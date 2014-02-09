@@ -10,34 +10,20 @@
 
 String command[3];
 // Define color arrays
-int red[] = {
-  255,0,0};
-int orange[] = {
-  255,40,0};
-int yellow[] = {
-  255,100,0};
-int lime[] = {
-  190,255,0};
-int green[] = {
-  0,255,0};
-int turquoise[] = {
-  0,255,60};
-int cyan[] = {
-  0,255,255};
-int lightblue[] = {
-  0,128,255};
-int blue[] = {
-  0,0,255};
-int purple[] = {
-  190,0,255};
-int pink[] = {
-  255,0,255};
-int bordeaux[] = {
-  255,0,127};
-int white[] = {
-  255,255,255};
-int off[] = {
-  0,0,0};
+int red[] = {255,0,0};
+int orange[] = {255,40,0};
+int yellow[] = {255,100,0};
+int lime[] = {190,255,0};
+int green[] = {0,255,0};
+int turquoise[] = {0,255,60};
+int cyan[] = {0,255,255};
+int lightblue[] = {0,128,255};
+int blue[] = {0,0,255};
+int purple[] = {190,0,255};
+int pink[] = {255,0,255};
+int bordeaux[] = {255,0,127};
+int white[] = {255,255,255};
+int off[] = {0,0,0};
 int left = 1;
 int right = 0;
 int *allColors[13] = {red,orange,yellow,lime,green,turquoise,cyan,lightblue,blue,purple,pink,white,bordeaux};
@@ -63,11 +49,13 @@ void loop(){
 }
 
 void info(){
+  // Print all available commands
   Serial.println("Commands available:");
   Serial.println("-------------------");
   Serial.println("- color <color(red/green/blue/..)> <opt: side(l/r)>");
   Serial.println("- strobe <color(red/green/blue/..)> <opt: speed(in ms)>");
   Serial.println("- fade <from(red/green/blue/..)> <to(red/green/blue/..)>");
+  Serial.println("- pulse <from(red/green/blue/..)> <to(red/green/blue/..)> <opt: speed(in ms)>");
   Serial.println("- rainbow");
   Serial.println("- police (whee hoo whee hoo!)");
   Serial.println("- info (this screen)");
@@ -78,6 +66,7 @@ void info(){
 }
 
 void colors(){
+  // Print all available colors
   int s = sizeof(allColorsString)/sizeof(String);
   int i;
   Serial.print("Colors available: ");
@@ -92,6 +81,7 @@ void colors(){
 }
 
 void executeCommand(){
+  // Check if a new command is set and execute it
   int *color;
   int side;
   int *from;
@@ -157,6 +147,7 @@ void executeCommand(){
 }
 
 void clearCommand(){
+  // Nullify command
   command[0] = NULL;
   command[1] = NULL;
   command[2] = NULL;
@@ -164,6 +155,7 @@ void clearCommand(){
 }
 
 int stringToSide(String s){
+  // Translate string to int
   int side;
   if(s == "l" || s == "left"){
     side = left;
@@ -176,6 +168,7 @@ int stringToSide(String s){
 }
 
 int *stringToColor(String c){
+  // Translate string to array
   int *color;
   if(c == "red"){
     color = red;
@@ -210,6 +203,7 @@ int *stringToColor(String c){
 }
 
 void setColor(int color[], int side){
+  // Set the color of a specific or both sides of the drone
   int i;
   int val;
   for(i = 0; i < 3; i ++){
@@ -229,6 +223,7 @@ void setColor(int color[], int side){
 }
 
 void setSide(int side, int color, int val){
+  // Write the analog values of the selected color to the corresponding pins
   switch(color){
     case 0:
       switch(side){
@@ -276,6 +271,7 @@ void setSide(int side, int color, int val){
 }
 
 void fade(int in[], int out[], int speed){
+  // Fade the LEDs from one color to the other
   unsigned n_steps = 256;
   int output[3];
   int red_diff   = out[0] - in[0];
@@ -295,6 +291,7 @@ void fade(int in[], int out[], int speed){
 }
 
 void pulse(int from[], int to[], int speed){
+  // Pulse the LEDs indefinitely from one color to the other
   clearCommand();
   int ms = 500;
   if(speed != NULL){
@@ -315,6 +312,7 @@ void pulse(int from[], int to[], int speed){
 }
 
 void strobe(int color[], int speed){
+  // Strobe the LEDs indefinitely
   int ms = 200;
   if(speed != NULL){
     ms = speed;
@@ -335,6 +333,7 @@ void strobe(int color[], int speed){
 }
 
 void readCommand(){
+  // Read command from serial connection and split into readable bits
   String str;
   char sr;
   int i = 0;
@@ -358,11 +357,11 @@ void readCommand(){
 }
 
 void police(){
+  // Whee hoo whee hoo
   while(1){
     for(int j = 0; j < 2; j++){
       for(int i = 0; i < 4; i++){
         if(j == 0){
-          // TODO: set left to red and right to blue
           resetPins();
           delay(60);
           setColor(red, 0);
@@ -370,7 +369,6 @@ void police(){
           delay(60);
         } 
         else {
-          // TODO: set left to blue and right to red
           resetPins();
           delay(60);
           setColor(red, 1);
@@ -390,6 +388,7 @@ void police(){
 }
 
 void rainbow(){
+  // Slowly fade the LEDs along the entire spectrum of visible light
   int pos;
   while(1){
     for(pos = 1; pos <= 13; pos++){
@@ -411,6 +410,7 @@ void rainbow(){
 }
 
 void resetPins(){
+  // Turn off all LEDs
   analogWrite(lred, 0);
   analogWrite(lgreen, 0);
   analogWrite(lblue, 0);

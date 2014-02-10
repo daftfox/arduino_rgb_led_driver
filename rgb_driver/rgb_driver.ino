@@ -388,15 +388,16 @@ void police(){
 }
 
 void rainbow(){
+  clearCommand();
   // Slowly fade the LEDs along the entire spectrum of visible light
   int pos;
   while(1){
     for(pos = 1; pos <= 13; pos++){
       if(pos == 13){
-        fade(allColors[pos-1], allColors[0], NULL);
+        fade(allColors[pos-1], allColors[0], 50);
         pos = 0;
       } else {
-        fade(allColors[pos-1], allColors[pos], NULL);
+        fade(allColors[pos-1], allColors[pos], 50);
       }
       readCommand();
       if(command[0] != NULL){
@@ -404,7 +405,6 @@ void rainbow(){
           resetPins();
           return;
       }
-      clearCommand();
     }
   }
 }

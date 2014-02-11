@@ -1,4 +1,4 @@
-#include <string.h>
+#include <VirtualWire.h>
 
 #define rblue 11
 #define rgreen 10
@@ -8,6 +8,10 @@
 #define lred 3
 #define front 12
 
+#define tx 12
+#define rx 14
+
+char *rfCommand;
 String command[3];
 // Define color arrays
 int red[] = {255,0,0};
@@ -29,14 +33,11 @@ int right = 0;
 int *allColors[13] = {red,orange,yellow,lime,green,turquoise,cyan,lightblue,blue,purple,pink,white,bordeaux};
 String allColorsString[13] = {"red","orange","yellow","lime","green","turquoise","cyan","lightblue","blue","purple","pink","white","bordeaux"};
 void setup(){
-  // Set LED pins to output
-  pinMode(rblue,OUTPUT);
-  pinMode(rgreen,OUTPUT);
-  pinMode(rred,OUTPUT);
-  pinMode(lblue,OUTPUT);
-  pinMode(lgreen,OUTPUT);
-  pinMode(lred,OUTPUT);
-  pinMode(front,OUTPUT);
+  // Set transmit and receive pins
+  vw_set_tx_pin(tx);
+  vw_set_rx_pin(rx);
+  // vw_set_ptt_inverted(true); // Required for DR3100
+  vw_setup(2000);	 // Bits per sec
 
   // Start serial connection
   Serial.begin(9600);
@@ -46,6 +47,28 @@ void setup(){
 void loop(){
   readCommand();
   executeCommand();
+}
+
+void sendRFCommand(){
+  int reply = 0;
+  uint8_t buf[VW_MAX_MESSAGE_LEN];
+  uint8_t buflen = VW_MAX_MESSAGE_LEN;
+  *rfCommand = '1';
+  while(reply == 0){
+    vw_send((uint8_t *)rfCommand, strlen(rfCommand));
+    vw_wait_tx();
+    if (vw_wait_rx_max(200)){
+      if (vw_get_message(buf, &buflen)){
+        int i;  
+        for (i = 0; i < buflen; i++)
+        {
+  	  Serial.print(buf[i], HEX);
+  	  Serial.print(" ");
+        }
+        reply = 1;
+      }
+    }
+  }
 }
 
 void info(){

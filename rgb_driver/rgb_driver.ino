@@ -50,25 +50,37 @@ void loop(){
 }
 
 void sendRFCommand(){
-  int reply = 0;
   uint8_t buf[VW_MAX_MESSAGE_LEN];
   uint8_t buflen = VW_MAX_MESSAGE_LEN;
   *rfCommand = '1';
-  while(reply == 0){
-    vw_send((uint8_t *)rfCommand, strlen(rfCommand));
-    vw_wait_tx();
-    if (vw_wait_rx_max(200)){
-      if (vw_get_message(buf, &buflen)){
-        int i;  
-        for (i = 0; i < buflen; i++)
-        {
-  	  Serial.print(buf[i], HEX);
-  	  Serial.print(" ");
-        }
-        reply = 1;
+  vw_send((uint8_t *)rfCommand, strlen(rfCommand));
+  vw_wait_tx();
+  if (vw_wait_rx_max(200)){
+    if (vw_get_message(buf, &buflen)){
+      int i;  
+      for (i = 0; i < buflen; i++)
+      {
+	  Serial.print(buf[i], HEX);
+	  Serial.print(" ");
       }
     }
   }
+}
+
+void receiveRFCommand(){
+  const char *msg = "REP";
+  uint8_t buf[VW_MAX_MESSAGE_LEN];
+  uint8_t buflen = VW_MAX_MESSAGE_LEN;
+  vw_wait_rx();
+  if (vw_get_message(buf, &buflen)){
+    int i;
+    const char *msg = "GOT";
+    for (i = 0; i < buflen; i++){
+	Serial.print(buf[i], HEX);
+      Serial.print(" ");
+    }
+  }
+  vw_send((uint8_t *)msg, strlen(msg));
 }
 
 void info(){
